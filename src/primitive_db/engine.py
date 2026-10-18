@@ -1,6 +1,5 @@
 import prompt
 
-
 PROMPTS_TEMPLATES = {
     'help': (
         '\n<command> exit - выйти из программы\n'
