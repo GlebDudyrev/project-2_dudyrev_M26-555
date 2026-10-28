@@ -10,3 +10,5 @@ AVAILABLE_TYPES = {
 USER_DATA_PATH = Path.home() / '.local' / 'share' / 'primitive_db'
 
 METADATA_PATH = USER_DATA_PATH / "db_meta.json"
+
+TABLE_DATA_PATH = USER_DATA_PATH / 'data'

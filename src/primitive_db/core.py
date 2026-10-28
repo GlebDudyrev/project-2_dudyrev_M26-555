@@ -1,4 +1,5 @@
 from .constants import AVAILABLE_TYPES
+from .utils import load_table_data
 
 
 def create_table(
@@ -77,3 +78,89 @@ def drop_table(
     print(f'Таблица "{table_name}" успешно удалена.')
 
     return metadata, True
+
+
+def insert(metadata, table_name, values):
+    if table_name not in metadata:
+        print(f'Ошибка: Таблица "{table_name}" не существует.')
+        return None
+
+    columns = [
+        (name, dtype)
+        for name, dtype in metadata[table_name]
+        if name != 'ID'
+    ]
+
+    if len(values) != len(columns):
+        print(
+            'Некорректное значение: количество значений '
+            'не соответствует количеству столбцов.'
+        )
+        return None
+
+    types = {
+        'int': int,
+        'str': str,
+        'bool': bool,
+    }
+
+    for (column_name, column_type), value in zip(columns, values):
+        if type(value) is not types[column_type]:
+            print(
+                f'Некорректное значение: {value}. '
+                f'Столбец "{column_name}" ожидает тип {column_type}.'
+            )
+            return None
+
+    data = load_table_data(table_name)
+
+    new_id = max((record['ID'] for record in data), default=0) + 1
+
+    record = {'ID': new_id}
+    record.update(
+        (name, value)
+        for (name, _), value in zip(columns, values)
+    )
+
+    data.append(record)
+
+    print(
+        f'Запись с ID={new_id} успешно добавлена '
+        f'в таблицу "{table_name}".'
+    )
+
+    return data
+
+
+def select(table_data, where_clause=None):
+    if where_clause is None:
+        return table_data
+
+    return [
+        record
+        for record in table_data
+        if all(
+            record.get(column) == value
+            for column, value in where_clause.items()
+        )
+    ]
+
+
+def update(table_data, set_clause, where_clause):
+    for record in select(table_data, where_clause):
+        record.update(set_clause)
+
+    return table_data
+
+
+def delete(table_data, where_clause):
+    table_data[:] = [
+        record
+        for record in table_data
+        if not all(
+            record.get(column) == value
+            for column, value in where_clause.items()
+        )
+    ]
+
+    return table_data
