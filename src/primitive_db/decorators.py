@@ -36,7 +36,8 @@ def confirm_action(action_name):
     def decorator(func):
         def wrapper(*args, **kwargs):
             answer = prompt.string(
-                f'Вы уверены, что хотите выполнить "{action_name}"? [y/n]: '
+                f'Вы уверены, что хотите выполнить "{action_name}"? [y/n]: ',
+                empty=True,
             )
 
             if answer != "y":
