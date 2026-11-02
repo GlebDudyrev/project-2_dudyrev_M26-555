@@ -3,7 +3,7 @@
 from .engine import run
 
 
-def main():    
+def main():
     run()
 
 
