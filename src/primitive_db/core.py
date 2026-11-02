@@ -9,7 +9,7 @@ from .utils import (
     save_table_data,
 )
 
-PYTHON_TYPES = {'int': int, 'str': str, 'bool': bool}
+PYTHON_TYPES = {"int": int, "str": str, "bool": bool}
 
 
 def _get_schema(metadata, table_name):
@@ -33,8 +33,8 @@ def _validate_clause(schema, clause):
         expected = PYTHON_TYPES[schema[column]]
         if type(value) is not expected:
             print(
-                f'Некорректное значение: {value}. '
-                f"Столбец '{column}' ожидает тип {schema[column]}."
+                f"Некорректное значение: {value}. "
+                f'Столбец "{column}" ожидает тип {schema[column]}.'
             )
             return False
 
@@ -53,17 +53,12 @@ def _matches(record, where_clause):
 
 
 def _select_records(table_data, where_clause=None):
-
     """Return all records or those matching the given condition."""
 
     if where_clause is None:
         return table_data
-    
-    return [
-        record
-        for record in table_data
-        if _matches(record, where_clause)
-    ]
+
+    return [record for record in table_data if _matches(record, where_clause)]
 
 
 def create_table(table_name, columns):
@@ -72,7 +67,7 @@ def create_table(table_name, columns):
     metadata = load_metadata(METADATA_PATH)
 
     if not table_name:
-        print('Некорректное значение: пустое имя таблицы. Попробуйте снова.')
+        print("Некорректное значение: пустое имя таблицы. Попробуйте снова.")
         return None
 
     if table_name in metadata:
@@ -80,7 +75,7 @@ def create_table(table_name, columns):
         return None
 
     if not columns:
-        print('Некорректное значение: не указаны столбцы. Попробуйте снова.')
+        print("Некорректное значение: не указаны столбцы. Попробуйте снова.")
         return None
 
     names = set()
@@ -88,24 +83,24 @@ def create_table(table_name, columns):
         if (
             not name
             or dtype not in AVAILABLE_TYPES
-            or (name == 'ID' and dtype != 'int')
+            or (name == "ID" and dtype != "int")
         ):
-            print(f'Некорректное значение: {name}:{dtype}. Попробуйте снова.')
+            print(f"Некорректное значение: {name}:{dtype}. Попробуйте снова.")
             return None
 
         if name in names:
-            print(f'Некорректное значение: повторяющийся столбец {name}.')
+            print(f"Некорректное значение: повторяющийся столбец {name}.")
             return None
 
         names.add(name)
 
     metadata[table_name] = [
-        ('ID', 'int'),
-        *((name, dtype) for name, dtype in columns if name != 'ID'),
+        ("ID", "int"),
+        *((name, dtype) for name, dtype in columns if name != "ID"),
     ]
     save_metadata(METADATA_PATH, metadata)
 
-    description = ', '.join(f'{name}:{dtype}' for name, dtype in metadata[table_name])
+    description = ", ".join(f"{name}:{dtype}" for name, dtype in metadata[table_name])
     print(f'Таблица "{table_name}" успешно создана со столбцами: {description}')
 
     return metadata
@@ -116,7 +111,7 @@ def list_tables():
 
     metadata = load_metadata(METADATA_PATH)
     for table_name in metadata:
-        print(f'- {table_name}')
+        print(f"- {table_name}")
 
     return list(metadata)
 
@@ -139,17 +134,17 @@ def drop_table(table_name):
 
 def insert(table_name, values):
     """Validate and append one record with an automatically generated ID."""
-    
+
     metadata = load_metadata(METADATA_PATH)
     schema = _get_schema(metadata, table_name)
     if schema is None:
         return None
 
-    columns = [(name, dtype) for name, dtype in metadata[table_name] if name != 'ID']
+    columns = [(name, dtype) for name, dtype in metadata[table_name] if name != "ID"]
     if len(values) != len(columns):
         print(
-            'Некорректное значение: количество значений '
-            'не соответствует количеству столбцов.'
+            "Некорректное значение: количество значений "
+            "не соответствует количеству столбцов."
         )
         return None
 
@@ -162,13 +157,10 @@ def insert(table_name, values):
 
     table_data = load_table_data(table_name)
 
-    new_id = max((record['ID'] for record in table_data), default=0) + 1
+    new_id = max((record["ID"] for record in table_data), default=0) + 1
 
-    record = {'ID': new_id}
-    record.update(
-        (name, value)
-        for (name, _), value in zip(columns, values)
-    )
+    record = {"ID": new_id}
+    record.update((name, value) for (name, _), value in zip(columns, values))
 
     table_data.append(record)
     save_table_data(table_name, table_data)
@@ -219,18 +211,18 @@ def update(table_name, set_clause, where_clause):
     ):
         return None
 
-    if 'ID' in set_clause:
-        print('Некорректное значение: ID нельзя изменять. Попробуйте снова.')
+    if "ID" in set_clause:
+        print("Некорректное значение: ID нельзя изменять. Попробуйте снова.")
         return None
 
     table_data = load_table_data(table_name)
     matching = _select_records(table_data, where_clause)
 
     if not matching:
-        print('Записи, удовлетворяющие условию, не найдены.')
+        print("Записи, удовлетворяющие условию, не найдены.")
         return None
 
-    ids = [record['ID'] for record in matching]
+    ids = [record["ID"] for record in matching]
     for record in matching:
         record.update(set_clause)
 
@@ -258,10 +250,10 @@ def delete(table_name, where_clause):
     matching = _select_records(table_data, where_clause)
 
     if not matching:
-        print('Записи, удовлетворяющие условию, не найдены.')
+        print("Записи, удовлетворяющие условию, не найдены.")
         return None
 
-    deleted_ids = [record['ID'] for record in matching]
+    deleted_ids = [record["ID"] for record in matching]
     table_data[:] = [
         record for record in table_data if not _matches(record, where_clause)
     ]
@@ -284,10 +276,10 @@ def info(table_name):
 
     columns = metadata[table_name]
     count = len(load_table_data(table_name))
-    column_info = ', '.join(f'{name}:{dtype}' for name, dtype in columns)
+    column_info = ", ".join(f"{name}:{dtype}" for name, dtype in columns)
 
-    print(f'Таблица: {table_name}')
-    print(f'Столбцы: {column_info}')
-    print(f'Количество записей: {count}')
+    print(f"Таблица: {table_name}")
+    print(f"Столбцы: {column_info}")
+    print(f"Количество записей: {count}")
 
     return count
