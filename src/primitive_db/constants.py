@@ -1,6 +1,7 @@
 import os
 
 AVAILABLE_TYPES = {"int", "str", "bool"}
+PYTHON_TYPES = {"int": int, "str": str, "bool": bool}
 
 USER_DATA_PATH = os.path.join(
     os.path.expanduser("~"), ".local", "share", "primitive_db"

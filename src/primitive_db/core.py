@@ -1,6 +1,7 @@
 from prettytable import PrettyTable
 
-from .constants import AVAILABLE_TYPES, METADATA_PATH
+from .constants import AVAILABLE_TYPES, METADATA_PATH, PYTHON_TYPES
+from .decorators import handle_db_errors, confirm_action, log_time, create_cacher
 from .utils import (
     delete_table_data,
     load_metadata,
@@ -9,7 +10,14 @@ from .utils import (
     save_table_data,
 )
 
-PYTHON_TYPES = {"int": int, "str": str, "bool": bool}
+
+_select_cache = create_cacher()
+
+
+def _invalidate_select_cache():
+    """Invalidate all cached SELECT results."""
+    global _select_cache
+    _select_cache = create_cacher()
 
 
 def _get_schema(metadata, table_name):
@@ -61,6 +69,7 @@ def _select_records(table_data, where_clause=None):
     return [record for record in table_data if _matches(record, where_clause)]
 
 
+@handle_db_errors
 def create_table(table_name, columns):
     """Create a table definition. The ID column is added automatically."""
 
@@ -99,6 +108,7 @@ def create_table(table_name, columns):
         *((name, dtype) for name, dtype in columns if name != "ID"),
     ]
     save_metadata(METADATA_PATH, metadata)
+    _invalidate_select_cache()
 
     description = ", ".join(f"{name}:{dtype}" for name, dtype in metadata[table_name])
     print(f'Таблица "{table_name}" успешно создана со столбцами: {description}')
@@ -106,6 +116,7 @@ def create_table(table_name, columns):
     return metadata
 
 
+@handle_db_errors
 def list_tables():
     """Display the names of all defined tables."""
 
@@ -116,6 +127,8 @@ def list_tables():
     return list(metadata)
 
 
+@handle_db_errors
+@confirm_action('удаление таблицы')
 def drop_table(table_name):
     """Remove a table definition and its associated data file."""
 
@@ -127,11 +140,15 @@ def drop_table(table_name):
     del metadata[table_name]
 
     save_metadata(METADATA_PATH, metadata)
+    _invalidate_select_cache()
+
     print(f'Таблица "{table_name}" успешно удалена.')
 
     return metadata
 
 
+@handle_db_errors
+@log_time
 def insert(table_name, values):
     """Validate and append one record with an automatically generated ID."""
 
@@ -164,12 +181,15 @@ def insert(table_name, values):
 
     table_data.append(record)
     save_table_data(table_name, table_data)
+    _invalidate_select_cache()
 
     print(f'Запись с ID={new_id} успешно добавлена в таблицу "{table_name}".')
 
     return table_data
 
 
+@handle_db_errors
+@log_time
 def select(table_name, where_clause=None):
     """Validate the query and display matching records using PrettyTable."""
 
@@ -182,9 +202,18 @@ def select(table_name, where_clause=None):
     if where_clause is not None and not _validate_clause(schema, where_clause):
         return None
 
-    table_data = load_table_data(table_name)
+    cache_key = (
+        table_name,
+        None if where_clause is None else tuple(sorted(where_clause.items())),
+    )
 
-    selected = _select_records(table_data, where_clause)
+    selected = _select_cache(
+        cache_key,
+        lambda: _select_records(
+            load_table_data(table_name),
+            where_clause,
+        ),
+    )
 
     table = PrettyTable()
     table.field_names = list(schema)
@@ -197,6 +226,7 @@ def select(table_name, where_clause=None):
     return selected
 
 
+@handle_db_errors
 def update(table_name, set_clause, where_clause):
     """Update matching records while preserving field types and unique IDs."""
 
@@ -227,6 +257,7 @@ def update(table_name, set_clause, where_clause):
         record.update(set_clause)
 
     save_table_data(table_name, table_data)
+    _invalidate_select_cache()
 
     for record_id in ids:
         print(f'Запись с ID={record_id} в таблице "{table_name}" успешно обновлена.')
@@ -234,6 +265,8 @@ def update(table_name, set_clause, where_clause):
     return table_data
 
 
+@handle_db_errors
+@confirm_action("удаление записей")
 def delete(table_name, where_clause):
     """Remove all records matching a validated condition."""
 
@@ -259,6 +292,7 @@ def delete(table_name, where_clause):
     ]
 
     save_table_data(table_name, table_data)
+    _invalidate_select_cache()
 
     for record_id in deleted_ids:
         print(f'Запись с ID={record_id} успешно удалена из таблицы "{table_name}".')
@@ -266,6 +300,7 @@ def delete(table_name, where_clause):
     return table_data
 
 
+@handle_db_errors
 def info(table_name):
     """Display table name, columns and current number of records."""
 
