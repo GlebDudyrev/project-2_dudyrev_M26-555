@@ -1,7 +1,7 @@
 from prettytable import PrettyTable
 
 from .constants import AVAILABLE_TYPES, METADATA_PATH, PYTHON_TYPES
-from .decorators import handle_db_errors, confirm_action, log_time, create_cacher
+from .decorators import confirm_action, create_cacher, handle_db_errors, log_time
 from .utils import (
     delete_table_data,
     load_metadata,
@@ -9,7 +9,6 @@ from .utils import (
     save_metadata,
     save_table_data,
 )
-
 
 _select_cache = create_cacher()
 
@@ -128,7 +127,7 @@ def list_tables():
 
 
 @handle_db_errors
-@confirm_action('удаление таблицы')
+@confirm_action("удаление таблицы")
 def drop_table(table_name):
     """Remove a table definition and its associated data file."""
 

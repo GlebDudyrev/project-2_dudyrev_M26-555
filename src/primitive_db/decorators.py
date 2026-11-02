@@ -1,5 +1,6 @@
-import prompt
 import time
+
+import prompt
 
 
 def handle_db_errors(func):
@@ -10,15 +11,15 @@ def handle_db_errors(func):
             return func(*args, **kwargs)
 
         except KeyError as error:
-            print(f'Ошибка: Таблица или столбец {error} не найден.')
+            print(f"Ошибка: Таблица или столбец {error} не найден.")
 
         except ValueError as error:
-            print(f'Ошибка валидации: {error}')
+            print(f"Ошибка валидации: {error}")
 
         except FileNotFoundError:
             print(
-                'Ошибка: Файл данных не найден. '
-                'Возможно, база данных не инициализирована.'
+                "Ошибка: Файл данных не найден. "
+                "Возможно, база данных не инициализирована."
             )
 
         return None
@@ -57,14 +58,10 @@ def log_time(func):
     def wrapper(*args, **kwargs):
         start_time = time.monotonic()
 
-        
         result = func(*args, **kwargs)
 
         elapsed_time = time.monotonic() - start_time
-        print(
-            f'Функция {func.__name__} '
-            f'выполнилась за {elapsed_time:.3f} секунд'
-        )
+        print(f"Функция {func.__name__} выполнилась за {elapsed_time:.3f} секунд")
 
         return result
 
