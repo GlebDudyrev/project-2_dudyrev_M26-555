@@ -235,6 +235,4 @@ uv build
 
 Полная демонстрация работы базы данных: создание таблицы, CRUD-операции, вывод данных, подтверждение и отмена удаления.
 
-**После публикации Asciinema заменить `RECORDING_ID` на идентификатор своей записи:**
-
 [![Демонстрация](https://asciinema.org/a/s4sVK9wGiq5ASFyi.svg)](https://asciinema.org/a/s4sVK9wGiq5ASFyi)
