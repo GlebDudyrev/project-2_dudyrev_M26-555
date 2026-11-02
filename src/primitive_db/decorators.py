@@ -61,8 +61,9 @@ def log_time(func):
 
         result = func(*args, **kwargs)
 
-        elapsed_time = time.monotonic() - start_time
-        print(f"Функция {func.__name__} выполнилась за {elapsed_time:.3f} секунд")
+        if result is not None:
+            elapsed_time = time.monotonic() - start_time
+            print(f"Функция {func.__name__} выполнилась за {elapsed_time:.3f} секунд")
 
         return result
 

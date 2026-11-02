@@ -9,3 +9,10 @@ wheels/
 # Virtual environments
 .venv
 .vscode
+
+# Database files
+db_meta.json
+data/
+
+# Ruff
+.ruff_cache/
