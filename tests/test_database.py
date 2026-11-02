@@ -47,6 +47,7 @@ def test_example_complete(root):
             "info users",
         ],
     )
+    print(out)
     assert (
         'Таблица "users" успешно создана со столбцами: '
         "ID:int, name:str, age:int, is_active:bool"

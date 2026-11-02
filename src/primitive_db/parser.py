@@ -197,7 +197,7 @@ def _split_where_outside_quotes(expression):
 
     quote = None
     for index, char in enumerate(expression):
-        if char in (''', '''):
+        if char in ('"', "'"):
             if quote is None:
                 quote = char
             elif quote == char:

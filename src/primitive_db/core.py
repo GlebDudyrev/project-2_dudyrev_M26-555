@@ -16,7 +16,7 @@ def _get_schema(metadata, table_name):
     """Return a table schema, reporting a missing table to the user."""
 
     if table_name not in metadata:
-        print(f"Ошибка: Таблица '{table_name}' не существует.")
+        print(f'Ошибка: Таблица "{table_name}" не существует.')
         return None
 
     return dict(metadata[table_name])
@@ -27,7 +27,7 @@ def _validate_clause(schema, clause):
 
     for column, value in clause.items():
         if column not in schema:
-            print(f"Некорректное значение: столбец '{column}' не существует.")
+            print(f'Некорректное значение: столбец "{column}" не существует.')
             return False
 
         expected = PYTHON_TYPES[schema[column]]
@@ -76,7 +76,7 @@ def create_table(table_name, columns):
         return None
 
     if table_name in metadata:
-        print(f"Ошибка: Таблица '{table_name}' уже существует.")
+        print(f'Ошибка: Таблица "{table_name}" уже существует.')
         return None
 
     if not columns:
@@ -105,8 +105,8 @@ def create_table(table_name, columns):
     ]
     save_metadata(METADATA_PATH, metadata)
 
-    description = ', '.join(f'{name}:{dtype}' for name, dtype in columns)
-    print(f"Таблица '{table_name}' успешно создана со столбцами: {description}")
+    description = ', '.join(f'{name}:{dtype}' for name, dtype in metadata[table_name])
+    print(f'Таблица "{table_name}" успешно создана со столбцами: {description}')
 
     return metadata
 
@@ -132,7 +132,7 @@ def drop_table(table_name):
     del metadata[table_name]
 
     save_metadata(METADATA_PATH, metadata)
-    print(f"Таблица '{table_name}' успешно удалена.")
+    print(f'Таблица "{table_name}" успешно удалена.')
 
     return metadata
 
@@ -156,7 +156,7 @@ def insert(table_name, values):
     for (name, dtype), value in zip(columns, values):
         if type(value) is not PYTHON_TYPES[dtype]:
             print(
-                f"Некорректное значение: {value}. Столбец '{name}' ожидает тип {dtype}."
+                f'Некорректное значение: {value}. Столбец "{name}" ожидает тип {dtype}.'
             )
             return None
 
@@ -173,7 +173,7 @@ def insert(table_name, values):
     table_data.append(record)
     save_table_data(table_name, table_data)
 
-    print(f"Запись с ID={new_id} успешно добавлена в таблицу '{table_name}'.")
+    print(f'Запись с ID={new_id} успешно добавлена в таблицу "{table_name}".')
 
     return table_data
 
@@ -237,7 +237,7 @@ def update(table_name, set_clause, where_clause):
     save_table_data(table_name, table_data)
 
     for record_id in ids:
-        print(f"Запись с ID={record_id} в таблице '{table_name}' успешно обновлена.")
+        print(f'Запись с ID={record_id} в таблице "{table_name}" успешно обновлена.')
 
     return table_data
 
@@ -269,7 +269,7 @@ def delete(table_name, where_clause):
     save_table_data(table_name, table_data)
 
     for record_id in deleted_ids:
-        print(f"Запись с ID={record_id} успешно удалена из таблицы '{table_name}'.")
+        print(f'Запись с ID={record_id} успешно удалена из таблицы "{table_name}".')
 
     return table_data
 
